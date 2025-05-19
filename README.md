@@ -2,10 +2,10 @@
 # Question 1
 # Scenario:
 We want to find high-value customers who have:
-At least one funded savings plan
-At least one funded investment plan
-And get their total deposits
-Sorted by highest total deposits
+- At least one funded savings plan
+- At least one funded investment plan
+- And get their total deposits
+- Sorted by highest total deposits
 
 To solve this scenario I used the combination of the differenet queries.
 The first section involving the SELECT query:  
@@ -73,4 +73,53 @@ ORDER BY total_deposits DESC;
 Sorts the results from highest to lowest total deposits.
 
 # Question 2
+We want to:
+Find how often each customer transacts monthly (average).
 
+Classify them into frequency categories:
+- High Frequency: 10 or more transactions per month
+- Medium Frequency: 3–9 transactions/month
+- Low Frequency: 2 or fewer transactions/month
+
+For each category, show:
+- How many customers are in it
+- The average number of transactions per customer per month
+
+# For the CASE Block of Code:
+COUNT(*): Total number of confirmed transactions.
+
+COUNT(DISTINCT DATE_FORMAT(transaction_date, '%Y-%m')): Number of months with transactions.
+
+COUNT(*) / COUNT(DISTINCT months): Gives the average transactions per month.
+
+CASE assigns a category based on that number.
+
+# # Deriving the customer count and average transactions
+COUNT(DISTINCT owner_id) AS customer_count
+Counts how many unique users fall into each frequency category.
+
+ROUND(AVG(...) OVER (PARTITION BY ...)) AS avg_transactions_per_month
+This part gives the average number of monthly transactions for users in each category:
+
+AVG(COUNT(*) / COUNT(DISTINCT DATE_FORMAT(transaction_date, '%Y-%m')))
+OVER (PARTITION BY CASE ... END)
+AVG(...) OVER (PARTITION BY ...): Groups users by their frequency category and calculates the average of their monthly averages.
+ROUND(..., 1): Rounds the result to one decimal place.
+
+FROM savings_savingsaccount
+We’re pulling all the transaction data from the savings table.
+
+WHERE transaction_status = 'confirmed' AND transaction_date IS NOT NULL
+I only want:
+Confirmed transactions
+Transactions with a valid date
+
+GROUP BY owner_id
+We compute average monthly transactions per customer.
+
+ORDER BY frequency_category
+Sorts the results alphabetically by category. 
+
+# The challenge I faced qith this question was not receiveing any rows
+
+# Question 3
