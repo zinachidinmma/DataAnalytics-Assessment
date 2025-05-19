@@ -1,6 +1,5 @@
 # DataAnalytics-Assessment
 # Question 1
-# Scenario:
 We want to find high-value customers who have:
 - At least one funded savings plan
 - At least one funded investment plan
@@ -123,9 +122,10 @@ Sorts the results alphabetically by category.
 # The challenge I faced qith this question was not receiveing any rows
 
 # Question 3
-Identify inactive customer plans (both savings and investment) where:
-There has been no transaction at all, or
-The last transaction was more than 365 days ago.
+We want to:
+- Identify inactive customer plans (both savings and investment) where:
+- There has been no transaction at all, or
+- The last transaction was more than 365 days ago.
 
 SELECT 
     p.id AS plan_id,
@@ -173,3 +173,62 @@ Case 2: Last transaction is older than 365 days
 # Final Block of Code
 ORDER BY inactivity_days DESC;
 Sorts results from the most inactive to the least.
+
+# Question 4
+We want to identify each customer’s estimated lifetime value using:
+- How long they've been a customer
+- Number of transactions
+- Sum of confirmed transaction amounts
+
+# For the SELECT Block of code
+it selects the customer's unique ID from the users_customuser table.
+# For the CONCAT part of code
+Combines the customer’s first and last name for display.
+# For the TIMESTAMPDIFF part of code
+Calculates how many months the customer has been with the platform (from when they joined to today).
+
+# COUNT Block of code
+  COUNT(s.id) AS total_transactions,
+Counts the number of confirmed savings transactions made by the customer.
+This uses the LEFT JOIN (explained below).
+
+
+    ROUND(
+        (COUNT(s.id) / GREATEST(TIMESTAMPDIFF(MONTH, u.date_joined, CURDATE()), 1)) 
+        * 12 
+        * (SUM(s.confirmed_amount) * 0.001), 
+        2
+    ) AS estimated_clv
+Let’s break this formula into parts:
+
+Part 1: COUNT(s.id) / tenure_months * 12
+Calculates the annualized transaction rate.
+
+Part 2: SUM(s.confirmed_amount) * 0.001
+Adds up all the confirmed transaction amounts for the customer.
+It's multiplied by 0.001 to convert kobo to naira (if amounts are stored in kobo).
+
+Full Formula:
+Combines both:
+Annual transaction frequency × average transaction value
+= Estimated Annual Value
+
+The ROUND(..., 2) keeps it to 2 decimal places.
+
+# LEFT JOIN block of code
+
+LEFT JOIN savings_savingsaccount s 
+    ON u.id = s.owner_id AND s.transaction_status = 'confirmed'
+Joins each customer to their confirmed savings transactions, if any.
+
+LEFT JOIN ensures users without transactions are still shown (with NULLs or 0s).
+
+# GROUP BY block of code
+
+GROUP BY u.id, u.first_name, u.last_name, u.date_joined
+Groups the data by each customer, so aggregations (COUNT and SUM) work correctly.
+
+# ORDER BY block of code
+ORDER BY estimated_clv DESC;
+Sorts the output by highest estimated CLV at the top.
+
