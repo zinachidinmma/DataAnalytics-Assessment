@@ -123,3 +123,53 @@ Sorts the results alphabetically by category.
 # The challenge I faced qith this question was not receiveing any rows
 
 # Question 3
+Identify inactive customer plans (both savings and investment) where:
+There has been no transaction at all, or
+The last transaction was more than 365 days ago.
+
+SELECT 
+    p.id AS plan_id,
+    p.owner_id,
+We're selecting from the plans_plan table.
+p.id is the unique ID of the plan.
+p.owner_id is the user who owns the plan.
+
+# FOR the CASE Block of CODE
+This part checks what type of plan it is:
+If is_a_fund = 1, it's an Investment plan.
+If is_regular_savings = 1, it's a Savings plan.
+Otherwise, it's labeled as Other.
+
+For the COALECSE Block of Code
+This calculates the most recent transaction date:
+First, it looks for the latest confirmed transaction in the savings_savingsaccount table.
+If no savings transaction is found, it falls back to p.last_charge_date (used for investments).
+COALESCE() picks the first non-null value.
+
+For the DATEDIFF Block of code   
+Calculates how many days have passed since the last transaction.
+
+# The FROM Block of Code
+FROM plans_plan p
+WHERE
+    p.is_deleted = 0 AND
+We're working only with active (not deleted) plans.
+
+-- Subquery opened here for AND condition
+    (
+        (SELECT MAX(s.transaction_date)
+         FROM savings_savingsaccount s
+         WHERE s.plan_id = p.id AND s.transaction_status = 'confirmed') IS NULL
+        AND p.last_charge_date IS NULL
+Case 1: No transactions at all
+No savings transactions found (IS NULL)
+No investment charge (last_charge_date IS NULL)
+
+Note second case inserted here with OR Condition
+        OR DATEDIFF(CURDATE(), COALESCE(...)) > 365
+    )
+Case 2: Last transaction is older than 365 days
+
+# Final Block of Code
+ORDER BY inactivity_days DESC;
+Sorts results from the most inactive to the least.
