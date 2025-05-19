@@ -94,7 +94,7 @@ COUNT(*) / COUNT(DISTINCT months): Gives the average transactions per month.
 
 CASE assigns a category based on that number.
 
-# # Deriving the customer count and average transactions
+# Deriving the customer count and average transactions
 COUNT(DISTINCT owner_id) AS customer_count
 Counts how many unique users fall into each frequency category.
 
