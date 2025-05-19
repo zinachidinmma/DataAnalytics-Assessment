@@ -7,7 +7,7 @@ At least one funded investment plan
 And get their total deposits
 Sorted by highest total deposits
 
-To solve this scenarion I used the combination of the differenet queries.
+To solve this scenario I used the combination of the differenet queries.
 The first section involving the SELECT query:  
 SELECT 
     u.id AS owner_id,
